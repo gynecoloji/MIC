@@ -37,15 +37,19 @@ required_packages <- c(
 load_packages(required_packages)
 
 # Set project paths
-project_dir <- "."  # Change to your project directory
+project_dir <- "../.."  # Change to your project directory
 data_dir <- file.path(project_dir, "03-data/Data_01/Processed")
-output_dir <- file.path(project_dir, "analysis")
+output_dir <- file.path(project_dir, "04-analysis/Analysis_01/Ana/Topic1/characterization")
 scfea_dir <- file.path(output_dir, "metabolism/scFEA")
+cytotrace_dir <- file.path(output_dir, 'Cytotrace')
+hallmark_dir <- file.path(output_dir, 'HALLMARK')
+markers_dir <- file.path(output_dir, 'Markers')
+
 
 # Create output directories if they don't exist
 dir.create(file.path(output_dir, "Cytotrace"), recursive = TRUE, showWarnings = FALSE)
-dir.create(file.path(output_dir, "characterization/integration"), recursive = TRUE, showWarnings = FALSE)
 dir.create(scfea_dir, recursive = TRUE, showWarnings = FALSE)
+
 
 # Load the Seurat object
 seurat_file <- file.path(data_dir, "Integrated_seurat_AS_AS3D_ASPDX_HVG5000.RData")
@@ -166,14 +170,14 @@ p_umap <- ggplot(umap_coords, aes(x=UMAP_1, y=UMAP_2, color=ranks)) +
                arrow = arrow(length = unit(10, "pt"), type = "closed"), color="black") +
   coord_fixed()
 
-ggsave(file.path(output_dir, "Cytotrace/UMAP.pdf"), p_umap, 
+ggsave(file.path(cytotrace_dir, "UMAP.pdf"), p_umap, 
        width = unit(12,"inch"), height = unit(12,"inch"))
 
 # Add raw CytoTRACE values and cell types
 umap_coords$order_values <- cytotrace_results$CytoTRACE
 umap_coords$new_type <- immune.combined@meta.data$new_type
 
-# Create rank boxplot by cell type
+# Create rank boxplot by cell type (optional)
 p_ranks <- ggplot(umap_coords, aes(x=new_type, y=ranks, fill=new_type)) +
   geom_boxplot() +
   scale_fill_manual(values = CC_colors)
@@ -193,11 +197,11 @@ df_magic <- MAGIC_data$result
 df_magic$new_type <- immune.combined$new_type
 
 # Generate and save boxplots for key genes
-gene_list <- c("RAD51", "DMC1", "MYC", "CD44", "CD24")
+gene_list <- c("MYC", "CD44", "CD24", "EPCAM", 'VIM')
 
 for(gene in gene_list) {
   if(gene %in% colnames(df_magic)) {
-    output_file <- file.path(output_dir, paste0("characterization/integration/", gene, "_boxplot.pdf"))
+    output_file <- file.path(markers_dir, paste0(gene, "_boxplot.pdf"))
     save_gene_boxplot(df_magic, gene, CC_colors, output_file)
   } else {
     warning(paste("Gene", gene, "not found in imputed data"))
@@ -212,7 +216,7 @@ if(length(aldh_genes) > 0) {
   
   save_gene_boxplot(
     tmp, "ALDH", CC_colors,
-    file.path(output_dir, "characterization/integration/ALDH_boxplot.pdf")
+    file.path(markers_dir, "ALDH_boxplot.pdf")
   )
 }
 
@@ -356,7 +360,7 @@ if(all(c("M_42", "M_58") %in% colnames(m171_results$flux))) {
     xlab("") + 
     ylab("ALDH associated Modules")
   
-  ggsave(file.path(output_dir, "characterization/integration/ALDH_associated_Modules_boxplot.pdf"), 
+  ggsave(file.path(output_dir, "ALDH_associated_Modules_boxplot.pdf"), 
          p_aldh_modules, width = unit(10,"inch"), height = unit(4,"inch"))
 }
 

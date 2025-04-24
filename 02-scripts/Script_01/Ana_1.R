@@ -311,7 +311,7 @@ write.csv(Embeddings(immune.combined, 'umap'), file.path(data_save,"Velocyto/UMA
 write.csv(VariableFeatures(immune.combined),file.path(data_save, "Velocyto/HVG.csv"))
 write.csv(CC_colors, file.path(data_save,"Velocyto/CC_colors.csv"))
 
-# Create Multi-panel Figure -----------------------------------------------
+# Create Multi-panel Figure (optional) -----------------------------------------------
 # Use smaller text sizes for multi-panel display
 f1 <- DimPlot(immune.combined, group.by = "Sample", pt.size = 1) +
   scale_color_manual(values = CC_colors_TS) +
